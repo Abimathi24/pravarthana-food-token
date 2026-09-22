@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total Participants</h5>
+                <p class="card-text text-primary" id="stat-total">-</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Food Claimed</h5>
+                <p class="card-text text-success" id="stat-claimed">-</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Not Claimed</h5>
+                <p class="card-text text-warning" id="stat-unclaimed">-</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Claim Percentage</h5>
+                <p class="card-text text-info" id="stat-percent">-</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Quick Actions</h5>
+                <a href="{{ url_for('admin.import_pdf') }}" class="btn btn-outline-primary me-2"><i class="fas fa-upload me-1"></i> Import Data</a>
+                <a href="{{ url_for('scanner.index') }}" class="btn btn-primary me-2"><i class="fas fa-camera me-1"></i> Scanner View</a>
+                <button onclick="wipeData()" class="btn btn-outline-danger me-2"><i class="fas fa-trash me-1"></i> Wipe Database</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function fetchStats() {
+        fetch('/dashboard/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('stat-total').innerText = data.total;
+                document.getElementById('stat-claimed').innerText = data.claimed;
+                document.getElementById('stat-unclaimed').innerText = data.unclaimed;
+                document.getElementById('stat-percent').innerText = data.percentage + '%';
+            })
+            .catch(error => console.error('Error fetching stats:', error));
+    }
+
+    function wipeData() {
+        if(confirm("Are you sure you want to wipe ALL participants? This cannot be undone!")) {
+            fetch('/admin/wipe', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        alert("Wiped " + data.deleted + " participants.");
+                        fetchStats();
+                    } else {
+                        alert("Error: " + data.error);
+                    }
+                })
+                .catch(err => alert("Error wiping data."));
+        }
+    }
+
+    // Initial fetch
+    document.addEventListener("DOMContentLoaded", fetchStats);
+    
+    // Auto refresh every 10 seconds
+    setInterval(fetchStats, 10000);
+</script>
+{% endblock %}

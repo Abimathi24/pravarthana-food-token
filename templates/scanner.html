@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block page_title %}Scan QR Code{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title mb-3">Camera Scanner</h5>
+                
+                <div id="reader"></div>
+                
+                <div id="scan-result" class="mt-4" style="display:none;">
+                    <div class="alert" id="result-alert" role="alert"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+    function onScanSuccess(decodedText, decodedResult) {
+        // Stop scanning temporarily
+        html5QrcodeScanner.pause(true);
+        
+        // Send to backend
+        fetch('/scanner/api/scan', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({qr_token: decodedText})
+        })
+        .then(res => res.json())
+        .then(data => {
+            const resDiv = document.getElementById('scan-result');
+            const alertDiv = document.getElementById('result-alert');
+            resDiv.style.display = 'block';
+            
+            alertDiv.className = 'alert'; // reset
+            if (data.status === 'SUCCESS') {
+                alertDiv.classList.add('alert-success');
+                alertDiv.innerHTML = `<h4><i class="fas fa-check-circle"></i> Success</h4><p>${data.message}</p>`;
+            } else if (data.status === 'ALREADY_CLAIMED') {
+                alertDiv.classList.add('alert-warning');
+                alertDiv.innerHTML = `<h4><i class="fas fa-exclamation-triangle"></i> Already Claimed</h4><p>${data.message}<br>Claimed at: ${data.claimed_at}</p>`;
+            } else {
+                alertDiv.classList.add('alert-danger');
+                alertDiv.innerHTML = `<h4><i class="fas fa-times-circle"></i> Invalid</h4><p>${data.message}</p>`;
+            }
+            
+            // Resume scanning after 3 seconds
+            setTimeout(() => {
+                resDiv.style.display = 'none';
+                html5QrcodeScanner.resume();
+            }, 3000);
+        })
+        .catch(err => {
+            console.error(err);
+            html5QrcodeScanner.resume();
+        });
+    }
+
+    function onScanFailure(error) {
+        // handle scan failure, usually better to ignore and keep scanning.
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: {width: 250, height: 250} },
+        /* verbose= */ false);
+    
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+</script>
+{% endblock %}

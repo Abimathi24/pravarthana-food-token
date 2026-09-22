@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find My Food Token - Pravarthana 26</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --error: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        input:focus + i {
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .token-display {
+            margin-top: 1rem;
+            animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .qr-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 16px;
+            display: inline-block;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .qr-container img {
+            display: block;
+            max-width: 200px;
+            height: auto;
+        }
+
+        .participant-details {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            padding-bottom: 0.75rem;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--text-main);
+            text-align: right;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-available {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-claimed {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-main);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="glass-card">
+        <div class="logo">PRAVARTHANA 26</div>
+        <div class="subtitle">Food Token Retrieval</div>
+
+        {% if error %}
+            <div class="error-msg">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if participant %}
+            <div class="token-display">
+                
+                {% if participant.food_claimed %}
+                    <div class="status-badge status-claimed mb-3">
+                        <i class="fas fa-check-circle"></i> Already Claimed
+                    </div>
+                {% else %}
+                    <div class="status-badge status-available mb-3">
+                        <i class="fas fa-ticket-alt"></i> Token Available
+                    </div>
+                    <div class="qr-container">
+                        <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR Code" />
+                    </div>
+                    <p class="text-muted" style="font-size: 0.85rem; margin-top:-0.5rem; margin-bottom:1.5rem;">Present this QR code at the food counter</p>
+                {% endif %}
+
+                <div class="participant-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value">{{ participant.name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">College</span>
+                        <span class="detail-value">{{ participant.college }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Participant ID</span>
+                        <span class="detail-value">{{ participant.participant_id }}</span>
+                    </div>
+                </div>
+
+                <a href="/my-token" class="btn-outline"><i class="fas fa-arrow-left me-1"></i> Back</a>
+            </div>
+        {% else %}
+            <form method="POST" action="/my-token">
+                <div class="input-group">
+                    <input type="text" name="name" placeholder="Full Name" required autofocus autocomplete="name">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="input-group">
+                    <input type="email" name="email" placeholder="Registered Email Address" required autocomplete="email">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="input-group">
+                    <input type="text" name="college" placeholder="College Name" required autocomplete="organization">
+                    <i class="fas fa-university"></i>
+                </div>
+                <button type="submit" class="btn-primary">
+                    Get My Token <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </form>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 1.5rem;">
+                Make sure to use the exact details you used during registration.
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+{% if participant and not participant.food_claimed %}
+<script>
+    // Realtime polling to auto-update the page when the admin scans the token
+    const qrToken = "{{ participant.qr_token }}";
+    
+    function checkStatus() {
+        fetch('/api/status/' + qrToken)
+            .then(res => res.json())
+            .then(data => {
+                if(data.claimed) {
+                    // It was claimed! Reload the page to show the "Already Claimed" UI
+                    window.location.reload();
+                }
+            })
+            .catch(err => console.error(err));
+    }
+    
+    // Poll every 3 seconds
+    setInterval(checkStatus, 3000);
+</script>
+{% endif %}
+
+</body>
+</html>

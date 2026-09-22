@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block page_title %}Participants{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0">Registered Participants</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
+                <i class="fas fa-plus"></i> Add Participant
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Participant ID</th>
+                        <th>Name</th>
+                        <th>College</th>
+                        <th>Food Status</th>
+                    </tr>
+                </thead>
+                <tbody id="participants-table-body">
+                    <!-- Loaded via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Participant Modal -->
+<div class="modal fade" id="addParticipantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Participant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addParticipantForm">
+                    <div class="mb-3">
+                        <label class="form-label">Participant ID</label>
+                        <input type="text" class="form-control" name="participant_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">College</label>
+                        <input type="text" class="form-control" name="college" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Participant</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function loadParticipants() {
+        fetch('/participants/api/list')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('participants-table-body');
+                tbody.innerHTML = '';
+                data.forEach(p => {
+                    let statusBadge = p.food_claimed 
+                        ? `<span class="badge bg-success">Claimed</span><br><small class="text-muted">${p.claim_time}</small>`
+                        : `<span class="badge bg-warning text-dark">Not Claimed</span>`;
+                        
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${p.participant_id}</strong></td>
+                            <td>${p.name}<br><small class="text-muted">${p.email}</small></td>
+                            <td>${p.college}</td>
+                            <td>${statusBadge}</td>
+                        </tr>
+                    `;
+                });
+            })
+            .catch(err => console.error("Error loading participants:", err));
+    }
+
+    document.getElementById('addParticipantForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        
+        fetch('/participants/api/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.error) {
+                alert(data.error);
+            } else {
+                alert('Success');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addParticipantModal'));
+                modal.hide();
+                loadParticipants();
+                e.target.reset();
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", loadParticipants);
+</script>
+{% endblock %}

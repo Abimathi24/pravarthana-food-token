@@ -1,0 +1,188 @@
+:root {
+    --primary-color: #0ea5e9; /* Cyan */
+    --primary-hover: #0284c7;
+    --sidebar-bg: #111827; /* Dark Gray */
+    --bg-color: #0f172a; /* Slate Dark */
+    --text-dark: #f8fafc;
+    --text-muted: #94a3b8;
+    --card-bg: #1e293b;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --border-color: #334155;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    background-image: radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.05) 0%, transparent 20%),
+                      radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 20%);
+    background-attachment: fixed;
+    color: var(--text-dark);
+}
+
+/* Sidebar Styles */
+#wrapper {
+    overflow-x: hidden;
+}
+
+#sidebar-wrapper {
+    min-height: 100vh;
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    transition: margin 0.25s ease-out;
+}
+
+.sidebar-heading {
+    color: var(--primary-color);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.list-group-item {
+    border: none;
+    padding: 15px 20px;
+    color: var(--text-muted);
+    font-weight: 500;
+    background-color: transparent;
+    transition: all 0.3s;
+}
+
+.list-group-item:hover, .list-group-item.active {
+    background-color: rgba(14, 165, 233, 0.1);
+    color: var(--primary-color);
+    border-right: 4px solid var(--primary-color);
+}
+
+#page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+}
+
+.navbar {
+    background-color: var(--sidebar-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.navbar .nav-link, .navbar h5 {
+    color: var(--text-dark) !important;
+}
+
+/* Mobile Toggle */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: -250px;
+    }
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* Cards & Dashboard */
+.card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    background-color: var(--card-bg);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    border-color: rgba(14, 165, 233, 0.3);
+}
+
+.card-title {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+}
+
+/* Tables */
+.table {
+    color: var(--text-dark);
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--primary-color);
+}
+.table-light {
+    background-color: #334155 !important;
+    color: var(--text-dark) !important;
+}
+.table-light th {
+    background-color: #334155 !important;
+    color: var(--text-muted) !important;
+    border-bottom: 2px solid var(--border-color);
+}
+.table td, .table th {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Scanner specific */
+#reader {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+    border: 1px solid var(--primary-color);
+}
+#reader video {
+    border-radius: 12px;
+}
+
+/* Modals */
+.modal-content {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+}
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+.form-control {
+    background-color: #0f172a;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+}
+.form-control:focus {
+    background-color: #0f172a;
+    color: var(--text-dark);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25);
+}
+.form-label {
+    color: var(--text-muted);
+}

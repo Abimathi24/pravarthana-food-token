@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pravarthana 26 - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem;
+            border-radius: 15px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.1);
+        }
+
+        .circuit-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M10 10 H 90 V 90 H 10 Z" fill="none" stroke="rgba(14, 165, 233, 0.05)" stroke-width="1"/></svg>');
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="circuit-bg"></div>
+    <div class="login-card text-center">
+        <h2 class="fw-bold mb-1" style="color: var(--primary-color);">PRAVARTHANA 26</h2>
+        <p class="text-muted mb-4 small">QR FOOD CLAIM SYSTEM</p>
+
+        <div id="error-msg" class="alert alert-danger" style="display:none;"></div>
+
+        <form id="loginForm">
+            <div class="mb-3 text-start">
+                <label class="form-label">Email address</label>
+                <input type="email" id="email" class="form-control" required autofocus>
+            </div>
+            <div class="mb-4 text-start">
+                <label class="form-label">Password</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" id="loginBtn">Authenticate</button>
+        </form>
+    </div>
+
+    <script>
+        // In a real deployment, these come from your Firebase Console
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbYV2M9AlC7r7q4_b40nj3Bi7s7wcS2nI",
+            authDomain: "pravarthana-26-food-claim.firebaseapp.com",
+            projectId: "pravarthana-26-food-claim",
+            storageBucket: "pravarthana-26-food-claim.firebasestorage.app",
+            messagingSenderId: "392787129709",
+            appId: "1:392787129709:web:563854458b789e3ab85664"
+        };
+
+        // Initialize Firebase ONLY if config is filled, else mock it for UI demonstration
+        if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
+            const errDiv = document.getElementById('error-msg');
+
+            btn.disabled = true;
+            btn.innerText = "Authenticating...";
+            errDiv.style.display = 'none';
+
+            try {
+                let idToken = "";
+                if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                    const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                    idToken = await userCredential.user.getIdToken();
+                } else {
+                    // MOCK for demonstration if Firebase not configured
+                    idToken = "mock_token_" + email;
+                    alert("Firebase not configured. Please setup Firebase Client SDK in login.html. Proceeding with mock token.");
+                }
+
+                // Send token to Flask session
+                const res = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ idToken: idToken })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    errDiv.innerText = data.error || "Authentication failed.";
+                    errDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errDiv.innerText = error.message;
+                errDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Authenticate";
+            }
+        });
+    </script>
+</body>
+
+</html>

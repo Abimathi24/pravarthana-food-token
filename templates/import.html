@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block page_title %}Import Participants{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Import via PDF</h5>
+                <p class="text-muted">Upload the participant list PDF. The system will extract names and emails and import them into Firestore.</p>
+                
+                <form id="importForm" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <input class="form-control form-control-lg" type="file" id="pdf_file" name="pdf_file" accept=".pdf" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="importBtn">
+                        <i class="fas fa-upload me-2"></i> Extract and Import
+                    </button>
+                </form>
+                
+                <div id="import-result" class="mt-4" style="display:none;">
+                    <div class="alert alert-success">
+                        <h4 class="alert-heading">Import Complete!</h4>
+                        <p>Found: <strong id="found-count">0</strong></p>
+                        <p>Inserted: <strong id="inserted-count">0</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('importForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('pdf_file');
+        if (!fileInput.files.length) return;
+        
+        const btn = document.getElementById('importBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+        
+        const formData = new FormData();
+        formData.append('pdf_file', fileInput.files[0]);
+        
+        fetch('/admin/import', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert("Error: " + data.error);
+            } else {
+                document.getElementById('import-result').style.display = 'block';
+                document.getElementById('found-count').innerText = data.total_found;
+                document.getElementById('inserted-count').innerText = data.inserted;
+            }
+        })
+        .catch(err => alert("An error occurred."))
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload me-2"></i> Extract and Import';
+        });
+    });
+</script>
+{% endblock %}

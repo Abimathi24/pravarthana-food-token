@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block page_title %}Food Tokens{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Token Management</h5>
+        <p class="text-muted">Currently, tokens can be generated from the Participants page.</p>
+        
+        <!-- Future: list of all tokens with pagination, filtering -->
+        <div class="alert alert-info">
+            Token list will be displayed here. Go to <a href="{{ url_for('participants.index') }}">Participants</a> to generate new tokens.
+        </div>
+    </div>
+</div>
+{% endblock %}
