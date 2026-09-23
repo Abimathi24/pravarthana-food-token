@@ -12,6 +12,10 @@ app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__fil
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# Initialize Firebase
+from firebase_config import init_firebase
+init_firebase()
+
 # Import routes
 from routes.admin import admin_bp
 from routes.public import public_bp
