@@ -5,3 +5,4 @@ openpyxl
 qrcode
 Pillow
 gunicorn
+python-dotenv
