@@ -20,11 +20,13 @@ init_firebase()
 from routes.admin import admin_bp
 from routes.public import public_bp
 from routes.auth import auth_bp
+from routes.scanner import scanner_bp
 
 # Register blueprints
 app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(public_bp)
 app.register_blueprint(auth_bp, url_prefix='/auth')
+app.register_blueprint(scanner_bp, url_prefix='/scanner')
 
 @app.route('/')
 def index():
