@@ -115,6 +115,11 @@ async function loadStats() {
                         <td class="font-monospace text-primary">${claim.token_id || '-'}</td>
                         <td class="small">${claim.claim_time || '-'}</td>
                         <td><span class="badge badge-claimed">CLAIMED</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteParticipant('${claim.id}')" title="Delete Participant">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -124,5 +129,59 @@ async function loadStats() {
         }
     } catch (error) {
         console.error('Failed to load stats:', error);
+    }
+}
+
+async function deleteParticipant(participantId) {
+    if (!confirm('Are you sure you want to delete this participant?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/admin/api/delete_participant/${participantId}`, {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        
+        if (response.ok) {
+            loadStats(); // Refresh table
+        } else {
+            alert('Failed to delete: ' + result.error);
+        }
+    } catch (error) {
+        alert('An error occurred while deleting the participant.');
+    }
+}
+
+async function wipeDatabase() {
+    const btn = document.getElementById('confirmWipeBtn');
+    const statusDiv = document.getElementById('wipeStatus');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Wiping...';
+    statusDiv.innerHTML = '';
+    
+    try {
+        const response = await fetch('/admin/api/wipe_database', {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        
+        if (response.ok) {
+            statusDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle me-1"></i>${result.success}</span>`;
+            loadStats(); // Refresh table
+            setTimeout(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('wipeModal'));
+                if (modal) modal.hide();
+                statusDiv.innerHTML = ''; // reset
+            }, 2000);
+        } else {
+            statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${result.error}</span>`;
+        }
+    } catch (error) {
+        statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Failed to wipe database.</span>`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Yes, Wipe Database';
     }
 }

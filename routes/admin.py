@@ -40,6 +40,7 @@ def get_stats():
         data = p.to_dict()
         if data.get('status') == 'CLAIMED':
             recent_claims.append({
+                'id': p.id,
                 'name': data.get('name'),
                 'email': data.get('email'),
                 'college': data.get('college'),
@@ -180,3 +181,40 @@ def add_participant():
     })
     
     return jsonify({"success": f"Participant {name} added successfully."})
+
+@admin_bp.route('/api/wipe_database', methods=['DELETE'])
+def wipe_database():
+    db = get_db()
+    if not db:
+        return jsonify({"error": "Database connection failed"}), 500
+        
+    try:
+        # Delete all participants
+        participants = db.collection('participants').stream()
+        for doc in participants:
+            doc.reference.delete()
+            
+        # Delete all food_claims logs if they exist
+        claims = db.collection('food_claims').stream()
+        for doc in claims:
+            doc.reference.delete()
+            
+        return jsonify({"success": "Database wiped successfully. All participants have been deleted."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@admin_bp.route('/api/delete_participant/<participant_id>', methods=['DELETE'])
+def delete_participant(participant_id):
+    db = get_db()
+    if not db:
+        return jsonify({"error": "Database connection failed"}), 500
+        
+    try:
+        doc_ref = db.collection('participants').document(participant_id)
+        if not doc_ref.get().exists:
+            return jsonify({"error": "Participant not found."}), 404
+            
+        doc_ref.delete()
+        return jsonify({"success": "Participant deleted successfully."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
