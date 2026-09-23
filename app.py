@@ -12,10 +12,12 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Import routes
 from routes.admin import admin_bp
 from routes.public import public_bp
+from routes.auth import auth_bp
 
 # Register blueprints
 app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(public_bp)
+app.register_blueprint(auth_bp, url_prefix='/auth')
 
 @app.route('/')
 def index():

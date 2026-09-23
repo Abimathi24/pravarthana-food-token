@@ -27,7 +27,7 @@ def login():
                 else:
                     session['role'] = 'staff'
                     
-                return jsonify({"success": True, "redirect": url_for('dashboard.index') if session['role'] == 'admin' else url_for('scanner.index')})
+                return jsonify({"success": True, "redirect": url_for('admin.dashboard') if session['role'] == 'admin' else url_for('scanner.index')})
             except Exception as e:
                 return jsonify({"error": str(e)}), 401
                 

@@ -7,28 +7,11 @@ import datetime
 
 admin_bp = Blueprint('admin', __name__)
 
-# Simple dummy authentication for demo
-ADMIN_PASSWORD = "password123"
-
 @admin_bp.before_request
 def check_auth():
-    if request.endpoint and request.endpoint != 'admin.login' and request.endpoint != 'static':
-        if not session.get('admin_logged_in'):
-            return redirect(url_for('admin.login'))
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('auth.login'))
 
-@admin_bp.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        if request.form.get('password') == ADMIN_PASSWORD:
-            session['admin_logged_in'] = True
-            return redirect(url_for('admin.dashboard'))
-        return render_template('admin_login.html', error="Invalid password")
-    return render_template('admin_login.html')
-
-@admin_bp.route('/logout')
-def logout():
-    session.pop('admin_logged_in', None)
-    return redirect(url_for('admin.login'))
 
 @admin_bp.route('/')
 def dashboard():
