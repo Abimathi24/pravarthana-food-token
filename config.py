@@ -8,4 +8,4 @@ class Config:
     FIREBASE_CREDENTIALS_PATH = os.environ.get('FIREBASE_CREDENTIALS_PATH', 'serviceAccountKey.json')
     
     # Optional settings for admin dashboard
-    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@pravarthana.com')
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
