@@ -18,8 +18,8 @@ def process_claim():
     email = data.get('email', '').strip().lower()
     college = data.get('college', '').strip().lower()
     
-    if not name and not email and not college:
-        return jsonify({"status": "error", "message": "Please enter Name, Email or College Name to search."}), 400
+    if not name or not email or not college:
+        return jsonify({"status": "error", "message": "Please enter Name, Email, and College Name."}), 400
         
     db = get_db()
     if not db:
@@ -27,36 +27,25 @@ def process_claim():
         
     participants_ref = db.collection('participants')
     
-    # Simple search strategy:
-    # First try exact match on email, as it's a unique identifier
+    # Search strategy: Require all three to match.
+    # We query by email (exact match) and then verify name and college case-insensitively.
     matched_doc = None
+    docs = participants_ref.where('email', '==', email).limit(1).stream()
     
-    if email:
-        docs = participants_ref.where('email', '==', email).limit(1).stream()
-        for doc in docs:
+    for doc in docs:
+        doc_data = doc.to_dict()
+        doc_name = doc_data.get('name', '').strip().lower()
+        doc_college = doc_data.get('college', '').strip().lower()
+        
+        # Check if the provided name and college match the database (case-insensitive)
+        if doc_name == name and doc_college == college:
             matched_doc = doc
-            break
-            
-    # If no email match, try name
-    if not matched_doc and name:
-        docs = participants_ref.where('name', '==', data.get('name', '').strip()).limit(1).stream()
-        for doc in docs:
-            matched_doc = doc
-            break
-            
-    # If still no match and college is provided
-    # Note: Querying by college might return many results. We'll just take the first match.
-    # In a real scenario, this might need refinement.
-    if not matched_doc and college:
-        docs = participants_ref.where('college', '==', data.get('college', '').strip()).limit(1).stream()
-        for doc in docs:
-            matched_doc = doc
-            break
+        break
             
     if not matched_doc:
         return jsonify({
             "status": "not_found",
-            "message": "Only Pravarthana26 registered participants can claim a food token."
+            "message": "We could not find a registration matching ALL of those details. Only Pravarthana26 registered participants can claim a food token."
         })
         
     participant = matched_doc.to_dict()
