@@ -82,6 +82,17 @@ def upload_file():
             # Expected columns: Name, Email, College (case insensitive check)
             # Map columns to standard names
             col_map = {}
+            # First pass: Look for exact matches to avoid grabbing 'Team Name' instead of 'Name'
+            for col in df.columns:
+                lower_col = str(col).lower().strip()
+                if lower_col == 'name' and 'name' not in col_map.values():
+                    col_map[col] = 'name'
+                elif lower_col == 'email' and 'email' not in col_map.values():
+                    col_map[col] = 'email'
+                elif lower_col in ['college', 'institution'] and 'college' not in col_map.values():
+                    col_map[col] = 'college'
+            
+            # Second pass: Look for partial matches for any missing required columns
             for col in df.columns:
                 lower_col = str(col).lower().strip()
                 if 'name' in lower_col and 'college' not in lower_col and 'name' not in col_map.values():
@@ -90,15 +101,6 @@ def upload_file():
                     col_map[col] = 'email'
                 elif ('college' in lower_col or 'institution' in lower_col) and 'college' not in col_map.values():
                     col_map[col] = 'college'
-            
-            if not col_map:
-                # Let's try to match exactly the user's provided CSV structure
-                # The user's CSV has columns: StudentID,Event,SNo,TeamNo,College,Name,Phone,Email
-                for col in df.columns:
-                    lower_col = str(col).strip()
-                    if lower_col == 'Name': col_map[col] = 'name'
-                    if lower_col == 'Email': col_map[col] = 'email'
-                    if lower_col == 'College': col_map[col] = 'college'
             
             df = df.rename(columns=col_map)
             
@@ -146,3 +148,35 @@ def upload_file():
             return jsonify({"error": str(e)}), 500
             
     return jsonify({"error": "Unknown error"}), 500
+
+@admin_bp.route('/api/add_participant', methods=['POST'])
+def add_participant():
+    db = get_db()
+    if not db:
+        return jsonify({"error": "Database connection failed"}), 500
+        
+    data = request.json
+    name = data.get('name', '').strip()
+    email = data.get('email', '').lower().strip()
+    college = data.get('college', '').strip()
+    
+    if not name or not college:
+        return jsonify({"error": "Name and College are required."}), 400
+        
+    doc_id = email if email else str(uuid.uuid4())
+    doc_ref = db.collection('participants').document(doc_id)
+    
+    # Check if exists
+    if doc_ref.get().exists and email:
+        return jsonify({"error": "A participant with this email is already registered."}), 400
+        
+    doc_ref.set({
+        'name': name,
+        'email': email,
+        'college': college,
+        'status': 'NOT_CLAIMED',
+        'token_id': None,
+        'claim_time': None
+    })
+    
+    return jsonify({"success": f"Participant {name} added successfully."})

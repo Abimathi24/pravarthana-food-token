@@ -46,6 +46,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    // Setup add participant
+    const addForm = document.getElementById('addParticipantForm');
+    if (addForm) {
+        addForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('addName').value;
+            const email = document.getElementById('addEmail').value;
+            const college = document.getElementById('addCollege').value;
+            const statusDiv = document.getElementById('addStatus');
+            const btn = document.getElementById('addBtn');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Adding...';
+            statusDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch('/admin/api/add_participant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, college })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle me-1"></i>${result.success}</span>`;
+                    loadStats(); // Refresh dashboard stats
+                    addForm.reset();
+                } else {
+                    statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${result.error}</span>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Failed to add participant.</span>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add Participant';
+            }
+        });
+    }
 });
 
 async function loadStats() {

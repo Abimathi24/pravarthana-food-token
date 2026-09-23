@@ -63,12 +63,32 @@
                     <div id="uploadStatus" class="mt-2 small"></div>
                 </div>
 
-                <div class="glass-panel">
+                <div class="glass-panel mb-4">
                     <h5 class="mb-3"><i class="bi bi-qr-code me-2"></i>Generate QR Code</h5>
                     <p class="text-muted small">Generate the Food Token claim QR code for participants.</p>
                     <a href="{{ url_for('public.generate_qr') }}" target="_blank" class="btn btn-outline-primary w-100">
                         <i class="bi bi-box-arrow-up-right me-2"></i>Open QR Code
                     </a>
+                </div>
+                
+                <div class="glass-panel">
+                    <h5 class="mb-3"><i class="bi bi-person-plus me-2"></i>On-Spot Registration</h5>
+                    <p class="text-muted small">Manually add a student who isn't on the list.</p>
+                    <form id="addParticipantForm">
+                        <div class="mb-2">
+                            <input type="text" class="form-control form-control-sm" id="addName" placeholder="Full Name" required>
+                        </div>
+                        <div class="mb-2">
+                            <input type="email" class="form-control form-control-sm" id="addEmail" placeholder="Email Address" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control form-control-sm" id="addCollege" placeholder="College Name" required>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm w-100" id="addBtn">
+                            <i class="bi bi-plus-circle me-1"></i> Add Participant
+                        </button>
+                    </form>
+                    <div id="addStatus" class="mt-2 small"></div>
                 </div>
             </div>
 
