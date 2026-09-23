@@ -84,11 +84,11 @@ def upload_file():
             col_map = {}
             for col in df.columns:
                 lower_col = str(col).lower().strip()
-                if 'name' in lower_col and 'college' not in lower_col:
+                if 'name' in lower_col and 'college' not in lower_col and 'name' not in col_map.values():
                     col_map[col] = 'name'
-                elif 'email' in lower_col:
+                elif 'email' in lower_col and 'email' not in col_map.values():
                     col_map[col] = 'email'
-                elif 'college' in lower_col or 'institution' in lower_col:
+                elif ('college' in lower_col or 'institution' in lower_col) and 'college' not in col_map.values():
                     col_map[col] = 'college'
             
             if not col_map:
