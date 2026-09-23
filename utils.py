@@ -1,6 +1,6 @@
 import functools
 from flask import session, redirect, url_for, request, g
-from firebase_config import auth
+from firebase_admin import auth
 
 def login_required(f):
     @functools.wraps(f)
