@@ -203,8 +203,8 @@ def wipe_database():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@admin_bp.route('/api/delete_participant/<participant_id>', methods=['DELETE'])
-def delete_participant(participant_id):
+@admin_bp.route('/api/undo_claim/<participant_id>', methods=['POST'])
+def undo_claim(participant_id):
     db = get_db()
     if not db:
         return jsonify({"error": "Database connection failed"}), 500
@@ -214,7 +214,11 @@ def delete_participant(participant_id):
         if not doc_ref.get().exists:
             return jsonify({"error": "Participant not found."}), 404
             
-        doc_ref.delete()
-        return jsonify({"success": "Participant deleted successfully."})
+        doc_ref.update({
+            'status': 'NOT_CLAIMED',
+            'token_id': None,
+            'claim_time': None
+        })
+        return jsonify({"success": "Claim removed successfully. Participant is still registered."})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

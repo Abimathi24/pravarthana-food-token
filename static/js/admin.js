@@ -116,7 +116,7 @@ async function loadStats() {
                         <td class="small">${claim.claim_time || '-'}</td>
                         <td><span class="badge badge-claimed">CLAIMED</span></td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteParticipant('${claim.id}')" title="Delete Participant">
+                            <button class="btn btn-sm btn-outline-danger" onclick="undoClaim('${claim.id}')" title="Undo Claim">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -132,24 +132,24 @@ async function loadStats() {
     }
 }
 
-async function deleteParticipant(participantId) {
-    if (!confirm('Are you sure you want to delete this participant?')) {
+async function undoClaim(participantId) {
+    if (!confirm('Are you sure you want to remove this claim? The student will remain registered.')) {
         return;
     }
     
     try {
-        const response = await fetch(`/admin/api/delete_participant/${participantId}`, {
-            method: 'DELETE'
+        const response = await fetch(`/admin/api/undo_claim/${participantId}`, {
+            method: 'POST'
         });
         const result = await response.json();
         
         if (response.ok) {
             loadStats(); // Refresh table
         } else {
-            alert('Failed to delete: ' + result.error);
+            alert('Failed to remove claim: ' + result.error);
         }
     } catch (error) {
-        alert('An error occurred while deleting the participant.');
+        alert('An error occurred while removing the claim.');
     }
 }
 
