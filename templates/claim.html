@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Food Token - Pravarthana26</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f6fa 0%, #e4e8f0 100%);
+            padding: 20px;
+        }
+        .claim-panel {
+            width: 100%;
+            max-width: 450px;
+        }
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="claim-panel glass-panel animate-fade-in" id="claimFormContainer">
+        <div class="text-center mb-4">
+            <div class="brand-logo">
+                <i class="bi bi-ticket-perforated-fill"></i>
+            </div>
+            <h3 class="header-gradient fw-bold mb-1">PRAVARTHANA26</h3>
+            <p class="text-muted fw-bold tracking-wide">FOOD TOKEN CLAIM</p>
+        </div>
+
+        <div id="messageArea"></div>
+
+        <form id="claimForm">
+            <p class="text-muted small text-center mb-4">Enter any ONE of the following to search for your registration:</p>
+            
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold">NAME</label>
+                <input type="text" id="nameInput" class="form-control" placeholder="e.g. Abimathi S">
+            </div>
+            
+            <div class="text-center text-muted small fw-bold mb-3">OR</div>
+            
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold">EMAIL</label>
+                <input type="email" id="emailInput" class="form-control" placeholder="e.g. student@college.edu">
+            </div>
+            
+            <div class="text-center text-muted small fw-bold mb-3">OR</div>
+            
+            <div class="mb-4">
+                <label class="form-label text-muted small fw-bold">COLLEGE NAME</label>
+                <input type="text" id="collegeInput" class="form-control" placeholder="e.g. ABC College">
+            </div>
+            
+            <button type="submit" class="btn btn-custom w-100 py-3 fs-5" id="claimBtn">
+                CLAIM FOOD TOKEN <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Result Container (Hidden by default) -->
+    <div class="claim-panel glass-panel d-none" id="resultContainer">
+        <div class="text-center mb-4">
+            <div class="brand-logo" id="resultIcon" style="background: var(--success);">
+                <i class="bi bi-check-lg"></i>
+            </div>
+            <h3 class="fw-bold mb-1" id="resultTitle">FOOD TOKEN CLAIMED</h3>
+            <p class="text-muted" id="resultSubtitle">Please show this screen at the food counter.</p>
+        </div>
+        
+        <div class="bg-light p-3 rounded-3 mb-4 border" id="tokenDetails">
+            <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted small fw-bold">NAME</span>
+                <span class="fw-bold" id="resName">Abimathi S</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted small fw-bold">COLLEGE</span>
+                <span class="fw-bold" id="resCollege">ABC College</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted small fw-bold">TOKEN ID</span>
+                <span class="fw-bold text-primary font-monospace" id="resTokenId">P26-FT-00125</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span class="text-muted small fw-bold">STATUS</span>
+                <span class="badge badge-claimed">CLAIMED</span>
+            </div>
+        </div>
+        
+        <button class="btn btn-outline-secondary w-100" onclick="resetForm()">Scan Another</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/claim.js') }}"></script>
+</body>
+</html>
