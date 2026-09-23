@@ -1,8 +1,11 @@
 import os
 from flask import Flask, redirect, url_for
 
+from config import Config
+
 # Initialize app
 app = Flask(__name__)
+app.config.from_object(Config)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'pravarthana26_super_secret_key')
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
