@@ -1,4 +1,4 @@
-from firebase_config import get_db, auth
+from firebase_config import get_db
 from firebase_admin import firestore
 import datetime
 import secrets
