@@ -1,7 +1,9 @@
-venv/
 __pycache__/
 *.pyc
+uploads/
 .env
-.DS_Store
+.venv/
+env/
+venv/
+*.sqlite3
 serviceAccountKey.json
-scratch/

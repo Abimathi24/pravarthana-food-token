@@ -1,24 +1,29 @@
-import firebase_admin
-from firebase_admin import credentials, firestore, auth
-from config import Config
 import os
-
-_db = None
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 def init_firebase():
-    global _db
+    # Only initialize if not already initialized
     if not firebase_admin._apps:
-        cred_path = Config.FIREBASE_CREDENTIALS_PATH
-        if os.path.exists(cred_path):
-            cred = credentials.Certificate(cred_path)
+        # Check if service account key exists
+        service_account_path = os.environ.get('FIREBASE_SERVICE_ACCOUNT_KEY', 'serviceAccountKey.json')
+        
+        if os.path.exists(service_account_path):
+            cred = credentials.Certificate(service_account_path)
             firebase_admin.initialize_app(cred)
-            _db = firestore.client()
-            print("Firebase Initialized Successfully.")
+            print("Firebase initialized successfully.")
         else:
-            print(f"WARNING: Firebase credentials not found at {cred_path}.")
-            
+            print(f"WARNING: Firebase service account key not found at {service_account_path}.")
+            print("Please add your serviceAccountKey.json to the root directory.")
+            # We initialize a default app anyway for local testing without firebase if needed, 
+            # or it will just crash when trying to access firestore without creds.
+            # In a real scenario, you should provide the key.
+            pass
+
 def get_db():
-    global _db
-    if _db is None:
-        init_firebase()
-    return _db
+    init_firebase()
+    try:
+        return firestore.client()
+    except Exception as e:
+        print(f"Error accessing Firestore: {e}")
+        return None
