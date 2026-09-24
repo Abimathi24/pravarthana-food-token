@@ -30,11 +30,11 @@ app.register_blueprint(scanner_bp, url_prefix='/scanner')
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    # Pass through HTTP errors
-    if hasattr(e, 'code'):
-        return jsonify(error=str(e)), e.code
     import traceback
-    return jsonify({"error": "Unhandled Exception", "traceback": traceback.format_exc()}), 500
+    return jsonify({
+        "error": f"Exception: {str(e)}", 
+        "traceback": traceback.format_exc()
+    }), 400
 
 @app.route('/')
 def index():

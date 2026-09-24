@@ -156,9 +156,10 @@ def upload_file():
         except UnicodeDecodeError:
             return jsonify({"error": "Failed to read file. Please ensure it is saved with UTF-8 encoding."}), 400
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            import traceback
+            return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 400
             
-    return jsonify({"error": "Unknown error"}), 500
+    return jsonify({"error": "Unknown error"}), 400
 
 @admin_bp.route('/api/add_participant', methods=['POST'])
 def add_participant():
