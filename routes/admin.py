@@ -84,7 +84,11 @@ def upload_file():
                 csv_reader = csv.reader(stream)
                 try:
                     headers = next(csv_reader)
-                    csv_input = list(csv_reader)
+                    csv_input = []
+                    for row in csv_reader:
+                        # Skip completely empty rows (common in Excel CSV exports)
+                        if any(cell and str(cell).strip() != "" for cell in row):
+                            csv_input.append(row)
                 except StopIteration:
                     return jsonify({"error": "Empty CSV file."}), 400
             else:
