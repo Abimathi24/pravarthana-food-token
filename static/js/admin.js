@@ -29,7 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData
                 });
                 
-                const result = await response.json();
+                const responseText = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    console.error("Non-JSON response received:", responseText);
+                    statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Server Error (${response.status}): ${responseText.substring(0, 100)}...</span>`;
+                    return;
+                }
                 
                 if (response.ok) {
                     statusDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle me-1"></i>${result.success}</span>`;
