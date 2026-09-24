@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, jsonify
 
 from config import Config
 
@@ -27,6 +27,14 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(public_bp)
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(scanner_bp, url_prefix='/scanner')
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Pass through HTTP errors
+    if hasattr(e, 'code'):
+        return jsonify(error=str(e)), e.code
+    import traceback
+    return jsonify({"error": "Unhandled Exception", "traceback": traceback.format_exc()}), 500
 
 @app.route('/')
 def index():
