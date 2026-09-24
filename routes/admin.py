@@ -1,5 +1,6 @@
 import os
-import pandas as pd
+import csv
+import io
 from flask import Blueprint, render_template, request, jsonify, current_app, session, redirect, url_for
 from firebase_config import get_db
 import uuid
@@ -10,6 +11,8 @@ admin_bp = Blueprint('admin', __name__)
 @admin_bp.before_request
 def check_auth():
     if 'user_id' not in session or session.get('role') != 'admin':
+        if request.path.startswith('/admin/api') or request.path == '/admin/upload':
+            return jsonify({"error": "Unauthorized. Please log in again."}), 401
         return redirect(url_for('auth.login'))
 
 
@@ -71,44 +74,43 @@ def upload_file():
         filename = file.filename
         
         try:
-            if filename.endswith('.csv'):
-                df = pd.read_csv(file)
-            elif filename.endswith('.xlsx') or filename.endswith('.xls'):
-                df = pd.read_excel(file)
-            else:
-                return jsonify({"error": "Unsupported file format. Please use CSV or Excel."}), 400
+            if not filename.endswith('.csv'):
+                return jsonify({"error": "Unsupported file format. Please use CSV."}), 400
                 
-            # Expected columns: Name, Email, College (case insensitive check)
-            # Map columns to standard names
+            stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+            csv_input = csv.reader(stream)
+            
+            try:
+                headers = next(csv_input)
+            except StopIteration:
+                return jsonify({"error": "Empty file."}), 400
+                
+            headers_lower = [str(h).lower().strip() for h in headers]
+            
             col_map = {}
-            # First pass: Look for exact matches to avoid grabbing 'Team Name' instead of 'Name'
-            for col in df.columns:
-                lower_col = str(col).lower().strip()
-                if lower_col == 'name' and 'name' not in col_map.values():
-                    col_map[col] = 'name'
-                elif lower_col == 'email' and 'email' not in col_map.values():
-                    col_map[col] = 'email'
-                elif lower_col in ['college', 'institution'] and 'college' not in col_map.values():
-                    col_map[col] = 'college'
-            
-            # Second pass: Look for partial matches for any missing required columns
-            for col in df.columns:
-                lower_col = str(col).lower().strip()
-                if 'name' in lower_col and 'college' not in lower_col and 'name' not in col_map.values():
-                    col_map[col] = 'name'
-                elif 'email' in lower_col and 'email' not in col_map.values():
-                    col_map[col] = 'email'
-                elif ('college' in lower_col or 'institution' in lower_col) and 'college' not in col_map.values():
-                    col_map[col] = 'college'
-            
-            df = df.rename(columns=col_map)
-            
+            # First pass: exact match
+            for i, col in enumerate(headers_lower):
+                if col == 'name' and 'name' not in col_map.values():
+                    col_map[i] = 'name'
+                elif col == 'email' and 'email' not in col_map.values():
+                    col_map[i] = 'email'
+                elif col in ['college', 'institution'] and 'college' not in col_map.values():
+                    col_map[i] = 'college'
+                    
+            # Second pass: partial match
+            for i, col in enumerate(headers_lower):
+                if 'name' in col and 'college' not in col and 'name' not in col_map.values():
+                    col_map[i] = 'name'
+                elif 'email' in col and 'email' not in col_map.values():
+                    col_map[i] = 'email'
+                elif ('college' in col or 'institution' in col) and 'college' not in col_map.values():
+                    col_map[i] = 'college'
+                    
             required = ['name', 'email', 'college']
-            missing = [req for req in required if req not in df.columns]
+            missing = [req for req in required if req not in col_map.values()]
             if missing:
                 return jsonify({"error": f"Missing required columns: {', '.join(missing)}"}), 400
                 
-            # Import to Firestore
             db = get_db()
             if not db:
                 return jsonify({"error": "Database not initialized"}), 500
@@ -117,24 +119,32 @@ def upload_file():
             collection_ref = db.collection('participants')
             
             count = 0
-            for index, row in df.iterrows():
-                doc_id = str(row['email']).lower().strip() if pd.notna(row['email']) else str(uuid.uuid4())
+            for row in csv_input:
+                row_data = {}
+                for i, val in enumerate(row):
+                    if i in col_map:
+                        row_data[col_map[i]] = val.strip() if val else ''
+                        
+                email = row_data.get('email', '').lower()
+                name = row_data.get('name', '')
+                college = row_data.get('college', '')
+                
+                doc_id = email if email else str(uuid.uuid4())
                 doc_ref = collection_ref.document(doc_id)
                 
-                # Check if exists to not overwrite claim status if re-uploading
                 doc = doc_ref.get()
                 if not doc.exists:
                     batch.set(doc_ref, {
-                        'name': str(row['name']).strip() if pd.notna(row['name']) else '',
-                        'email': str(row['email']).lower().strip() if pd.notna(row['email']) else '',
-                        'college': str(row['college']).strip() if pd.notna(row['college']) else '',
+                        'name': name,
+                        'email': email,
+                        'college': college,
                         'status': 'NOT_CLAIMED',
                         'token_id': None,
                         'claim_time': None
                     })
                     count += 1
                 
-                if count % 400 == 0:  # Firestore batch limit is 500
+                if count > 0 and count % 400 == 0:
                     batch.commit()
                     batch = db.batch()
                     
@@ -143,6 +153,8 @@ def upload_file():
                 
             return jsonify({"success": f"Imported {count} new participants successfully."})
             
+        except UnicodeDecodeError:
+            return jsonify({"error": "Failed to read file. Please ensure it is saved with UTF-8 encoding."}), 400
         except Exception as e:
             return jsonify({"error": str(e)}), 500
             
