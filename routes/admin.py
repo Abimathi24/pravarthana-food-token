@@ -69,14 +69,12 @@ def upload_file():
         
     if file:
         filename = file.filename
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
         
         try:
             if filename.endswith('.csv'):
-                df = pd.read_csv(filepath)
+                df = pd.read_csv(file)
             elif filename.endswith('.xlsx') or filename.endswith('.xls'):
-                df = pd.read_excel(filepath)
+                df = pd.read_excel(file)
             else:
                 return jsonify({"error": "Unsupported file format. Please use CSV or Excel."}), 400
                 
