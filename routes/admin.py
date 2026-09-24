@@ -142,6 +142,10 @@ def upload_file():
             collection_ref = db.collection('participants')
             
             count = 0
+            
+            # Fetch all existing document IDs in ONE network call to avoid timeouts
+            existing_docs = {doc.id for doc in collection_ref.stream()}
+            
             for row in csv_input:
                 row_data = {}
                 for i, val in enumerate(row):
@@ -153,10 +157,9 @@ def upload_file():
                 college = row_data.get('college', '')
                 
                 doc_id = email if email else str(uuid.uuid4())
-                doc_ref = collection_ref.document(doc_id)
                 
-                doc = doc_ref.get()
-                if not doc.exists:
+                if doc_id not in existing_docs:
+                    doc_ref = collection_ref.document(doc_id)
                     batch.set(doc_ref, {
                         'name': name,
                         'email': email,
@@ -165,6 +168,7 @@ def upload_file():
                         'token_id': None,
                         'claim_time': None
                     })
+                    existing_docs.add(doc_id)
                     count += 1
                 
                 if count > 0 and count % 400 == 0:
