@@ -74,16 +74,35 @@ def upload_file():
         filename = file.filename
         
         try:
-            if not filename.endswith('.csv'):
-                return jsonify({"error": "Unsupported file format. Please use CSV."}), 400
+            if not (filename.endswith('.csv') or filename.endswith('.xlsx') or filename.endswith('.xls')):
+                return jsonify({"error": "Unsupported file format. Please use CSV or Excel (.xlsx)."}), 400
                 
-            stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
-            csv_input = csv.reader(stream)
+            csv_input = []
             
-            try:
-                headers = next(csv_input)
-            except StopIteration:
-                return jsonify({"error": "Empty file."}), 400
+            if filename.endswith('.csv'):
+                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_reader = csv.reader(stream)
+                try:
+                    headers = next(csv_reader)
+                    csv_input = list(csv_reader)
+                except StopIteration:
+                    return jsonify({"error": "Empty CSV file."}), 400
+            else:
+                import openpyxl
+                # Process Excel file using openpyxl (data_only to get values, read_only for memory efficiency)
+                workbook = openpyxl.load_workbook(file.stream, data_only=True, read_only=True)
+                sheet = workbook.active
+                
+                rows = list(sheet.iter_rows(values_only=True))
+                if not rows:
+                    return jsonify({"error": "Empty Excel file."}), 400
+                    
+                headers = [str(cell) if cell is not None else "" for cell in rows[0]]
+                csv_input = []
+                for row in rows[1:]:
+                    # Skip completely empty rows
+                    if any(cell is not None and str(cell).strip() != "" for cell in row):
+                        csv_input.append([str(cell).strip() if cell is not None else "" for cell in row])
                 
             headers_lower = [str(h).lower().strip() for h in headers]
             
