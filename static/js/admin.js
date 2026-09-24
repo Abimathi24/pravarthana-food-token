@@ -39,7 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${result.error}</span>`;
                 }
             } catch (error) {
-                statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Upload failed. Ensure server is running.</span>`;
+                console.error("Upload Error:", error);
+                statusDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Upload failed. ${error.message}</span>`;
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Upload Data';
