@@ -74,8 +74,8 @@ def upload_file():
         filename = file.filename
         
         try:
-            if not (filename.endswith('.csv') or filename.endswith('.xlsx') or filename.endswith('.xls')):
-                return jsonify({"error": "Unsupported file format. Please use CSV or Excel (.xlsx)."}), 400
+            if not (filename.endswith('.csv') or filename.endswith('.xlsx')):
+                return jsonify({"error": "Unsupported file format. Please use CSV or modern Excel (.xlsx)."}), 400
                 
             csv_input = []
             
